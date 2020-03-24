@@ -47,7 +47,7 @@ expdb version 0.0.1
 
 Usage:
     expdb.sh [--dir </Path/to/dir>] [--file <file-prefix>] [--sqlfile <sql-file-name>]
-                   [--sqldir </Path/to/sqldir>] [--clip]
+                   [--sqldir </Path/to/sqldir>] [--table] [--clip]
                    [--vertion] [--help]
 
 Options:
@@ -55,6 +55,7 @@ Options:
     --file, -f          出力ファイル名
     --sqlfile, -s       SQLファイル名
     --sqldir, -S        SQLファイル格納先ディレクトリ名
+    --table, -t         SQL出力結果を表形式で出力する
     --clip, -c          出力結果をクリップボードにコピー（SQLディレクトリ指定時'--sqldir'は無効）
     --version, -v       バージョン情報
     --help, -h          ヘルプ

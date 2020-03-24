@@ -26,6 +26,7 @@ CLIPBOARD=${FLG_ENABLED}
 TEST_DIR=""
 TEST_FILE_PREFIX=""
 SQLDIR=""
+TABLE_OPT=""
 
 ###############################
 # usage
@@ -38,7 +39,7 @@ $(version)
 
 Usage:
     ${CMDNAME} [--dir </Path/to/dir>] [--file <file-prefix>] [--sqlfile <sql-file-name>]
-                   [--sqldir </Path/to/sqldir>] [--clip]
+                   [--sqldir </Path/to/sqldir>] [--table] [--clip]
                    [--vertion] [--help]
 
 Options:
@@ -46,6 +47,7 @@ Options:
     --file, -f          出力ファイル名
     --sqlfile, -s       SQLファイル名
     --sqldir, -S        SQLファイル格納先ディレクトリ名
+    --table, -t         SQL出力結果を表形式で出力する
     --clip, -c          出力結果をクリップボードにコピー（SQLディレクトリ指定時'--sqldir'は無効）
     --version, -v       バージョン情報
     --help, -h          ヘルプ
@@ -89,6 +91,10 @@ get_options()
             --sqldir|-S)
                 SQLDIR=${2}
                 shift
+            ;;
+
+            --table|-t)
+                TABLE_OPT="--table"
             ;;
 
             --clip|-c)
@@ -179,11 +185,12 @@ db_export()
     OUTPUT_FILE_NAME=$2
     echo "Input query file : ${SQLFILE_NAME}"
     echo "Export file      : ${OUTPUT_FILE_NAME}"
-    mysql --host ${ENV_DB_HOST} -u${ENV_DB_USER} -p${ENV_DB_PASSWORD} --database "${ENV_DB_SCHEME}" --ssl-cipher=AES256-SHA < ${SQLFILE_NAME} > ${TMP_FILE}
-    RC=${?}
+    mysql --host ${ENV_DB_HOST} -u${ENV_DB_USER} -p${ENV_DB_PASSWORD} ${TABLE_OPT} --database "${ENV_DB_SCHEME}" --ssl-cipher=AES256-SHA < ${SQLFILE_NAME} > ${TMP_FILE}
+    SQLCODE=${?}
     cat ${TMP_FILE} >> ${OUTPUT_FILE_NAME}
-    if [ ${RC} -ne ${RC_OK} ]; then
+    if [ ${SQLCODE} -ne ${RC_OK} ]; then
         echo "Error occurred : ${PROCNAME} ${SQLFILE_NAME}"
+        echo "SQL Code       : ${SQLCODE}"
         exit ${RC_ERROR}
     fi
 }
@@ -199,7 +206,7 @@ get_db_evidence()
     yesno_chk 
     RC=$?
     if [ ${RC} -ne ${RC_OK} ]; then
-        echo "テストを中断します"
+        echo "データの取得を中断します"
         exit ${RC}
     fi
     check_test_file ${OUTPUT_FILE}
